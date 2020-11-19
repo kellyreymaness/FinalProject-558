@@ -50,8 +50,8 @@ shinyUI(fluidPage(
                                  h5(strong("Year:")," 2019"),
                                  h5(strong("Source:"), a(href="https://www.fantasyfootballdatapros.com/csv_files", 
                                                          "Fantasy Football Data Pros")), br(),
-                                 h6(em("^Note: The following variables were added by the programmer using data in the source data set:
-                       Opps, Touches, & QualPerTouch"))
+                                 h6(em("^Note: The following variables were added by the programmer using data 
+                                 in the source data set: Opps, Touches, & QualPerTouch"))
                              ),
                              mainPanel(h3(strong("About the App")),
                                        h4("The purpose of this application is to provide a simple point-and-click
@@ -99,7 +99,9 @@ shinyUI(fluidPage(
                              ),
                              mainPanel(
                                  uiOutput("PlotTitle"),
-                                 plotlyOutput("ScatterPlot")
+                                 plotlyOutput("ScatterPlot"),
+                                 br(),
+                                 verbatimTextOutput("NumSumm")
                              )
                          )
                 ),

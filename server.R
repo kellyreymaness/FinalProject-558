@@ -25,7 +25,7 @@ ModifiedData <- ffData %>% select(Player, Pos, Age, GS, FumblesLost, PassTD,
 # Define server logic 
 shinyServer(function(session, input, output) {
     
-    #Create Scatterplots
+    #Create Scatterplots, DATA EXPLORATION TAB
     output$ScatterPlot <- renderPlotly({
         if(input$predictor=="Opportunities" & input$position==0) {
             plot_ly(data=ffData, x=~FantasyPoints, y=~Opps)
@@ -41,7 +41,7 @@ shinyServer(function(session, input, output) {
         }
     })
     
-    #Create dynamic title for Scatterplots
+    #Create dynamic title for Scatterplots, DATA EXPLORATION TAB
     output$PlotTitle <- renderUI({
         if(input$predictor=="Opportunities") {
             h4(strong("Scatterplot: Opportunities vs. Fantasy Points"))
@@ -50,14 +50,23 @@ shinyServer(function(session, input, output) {
         } else {h4(strong("Scatterplot: Quality Per Touch vs. Fantasy Points"))}
     })
     
-    #Create biplots for PCA Tab
+    #Create Numeric Summaries, DATA EXPLORATION TAB
+    output$NumSumm <- renderPrint({
+        if (input$predictor=="Opportunities") {
+            summary(ffData$Opps)
+        } else if (input$predictor=="Touches") {
+            summary(ffData$Touches)
+        } else {summary(ffData$QualPerTouch)}
+    })
+    
+    #Create biplots for PCA TAB
     output$BiPlot <- renderPlot({
         if (input$var=="Fumbles Lost") {
             biplot(PC1, cex = 1.1, xlabs=rep(".", nrow(ffData)))
         } else {biplot(PC2, cex=1.1, xlabs=rep(".", nrow(ffData)))}
     })
     
-    #Create dynamic title for Biplots
+    #Create dynamic title for Biplots, PCA TAB
     output$BiplotTitle <- renderUI({
         if(input$var=="Fumbles Lost") {
             h4(strong("Biplot: Fumbles Lost & Quality Per Touch"))
