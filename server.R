@@ -8,12 +8,19 @@ library(ggplot2)
 library(plotly)
 library(caret)
 
-#Read in data & create 4 new variables
+#Read in data, create new variables, complete other data cleaning/segmentation tasks
 ffData <- read_csv(file="ff2019.csv")
 ffData <- ffData %>% mutate(Opps = (RushAtt + Tgt + PassAtt)) %>% 
     mutate(Touches = (RushAtt + Rec + PassCmp)) %>% 
     mutate(QualPerTouch = ((RecYds + RushYds + PassYds)/(RushAtt + Rec + PassCmp)))
 ffData <- na.exclude(ffData)
+
+PC1 <- prcomp(select(ffData, QualPerTouch, FumblesLost), scale= TRUE)
+PC2 <- prcomp(select(ffData, QualPerTouch, Opps), scale= TRUE)
+
+FullData <- ffData
+ModifiedData <- ffData %>% select(Player, Pos, Age, GS, FumblesLost, PassTD, 
+                                  RushTD, RecTD, Opps, Touches, QualPerTouch)
 
 # Define server logic 
 shinyServer(function(session, input, output) {
@@ -43,5 +50,39 @@ shinyServer(function(session, input, output) {
         } else {h4(strong("Scatterplot: Quality Per Touch vs. Fantasy Points"))}
     })
     
+    #Create biplots for PCA Tab
+    output$BiPlot <- renderPlot({
+        if (input$var=="Fumbles Lost") {
+            biplot(PC1, cex = 1.1, xlabs=rep(".", nrow(ffData)))
+        } else {biplot(PC2, cex=1.1, xlabs=rep(".", nrow(ffData)))}
+    })
+    
+    #Create dynamic title for Biplots
+    output$BiplotTitle <- renderUI({
+        if(input$var=="Fumbles Lost") {
+            h4(strong("Biplot: Fumbles Lost & Quality Per Touch"))
+        } else {h4(strong("Biplot: Opportunities & Quality Per Touch"))}
+    })
+    
+    # Create logic for DATA DOWNLOAD Tab
+    datasetInput <- reactive({
+        switch(input$dataset,
+               "Full dataset" = FullData,
+               "Modified dataset" = ModifiedData)
+    })
+    
+    output$DataTable <- renderTable({
+        datasetInput()
+    })
+    
+    output$dl <- downloadHandler(
+        filename = function() {
+            paste(input$dataset, input$filetype, sep=".")},
+        content = function(file) {
+            part <- switch(input$filetype, "csv" = ",", "tsv" = "\t")
+        write.table(datasetInput(), file, sep = part,
+                        row.names = FALSE)
+        }
+    )
 
 })

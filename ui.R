@@ -53,7 +53,40 @@ shinyUI(fluidPage(
                                  h6(em("^Note: The following variables were added by the programmer using data in the source data set:
                        Opps, Touches, & QualPerTouch"))
                              ),
-                             mainPanel(h3("Some other text about the app goes here"))
+                             mainPanel(h3(strong("About the App")),
+                                       h4("The purpose of this application is to provide a simple point-and-click
+                                       tool for conducting basic descriptive analysis of NFL player statistics
+                                          & generating season-long Fantasy Football points predictions."),
+                                       h3(strong("Navigating the App")),
+                                       h4("In addition to this page, there are four additional sections 
+                                          of this app. Descriptions of each are provided below."),
+                                       h5(strong("*Data exploration:"), "This tab includes a graphical summary of 
+                                          the relationship between a subset of predictors and the season-long
+                                          Fantasy points variable. Additionally, there are some simple numerical
+                                          summaries."),
+                                       h5(strong("*Principal Components Analysis:"), "The purpose of Principal
+                                          Components Analysis, or PCA, is to understand ovearching patterns in
+                                          data by identifying a few components that account for the most variation
+                                          in the dataset. This tab shows biplots generated from your variable
+                                          selection in the left pane. These biplots will reveal how much each
+                                          characteristic influences each principal component. The farther away
+                                          from the anchor points of the PCs (i.e. imagine a line bisecting the
+                                          graph, originating at 0 on both axes), the more that particular factor
+                                          influences the PC."),
+                                       h5(strong("*Modeling:"), "This tab incorporates two predictive models: 
+                                          1) a Multiple Regression Model, and 2) a Random Forest Model. The former
+                                          is a linear model that determines the best fit line for the data,
+                                          thereby issuing predictions that fall somewhere on this line. The 
+                                          latter is a ensemble, tree-based method with typically gives more
+                                          precise predictions. You may select variables from the left pane and
+                                          select the 'Make Predictions' box to generate projections. 
+                                          Give it a try!"),
+                                       h5(strong("*Download Data:"), "This section allows the user to
+                                          download the based data used for this application. There are two 
+                                          options: 1) the full dataset (this includes 26 variables) or 2) a
+                                          modidied dataset (includes the 11 variables used throughout the
+                                          application).")
+                                       )
                          )
                 ),
                 
@@ -71,7 +104,18 @@ shinyUI(fluidPage(
                          )
                 ),
                 
-                tabPanel("Principal Components Analysis"),
+                tabPanel("Principal Components Analysis",
+                    sidebarLayout(
+                        sidebarPanel(
+                            h5("Please select a variable below to compare against ", em("Quality Per Touch")),
+                            selectizeInput("var", "Variables", selected = "Fumbles Lost", 
+                                           choices=c("Fumbles Lost", "Opportunities"))
+                    ),
+                    mainPanel(
+                        uiOutput("BiplotTitle"),
+                        plotOutput("BiPlot")
+                    ))
+                ),
                 
                 tabPanel("Modeling",
                          sidebarLayout(
@@ -89,9 +133,20 @@ shinyUI(fluidPage(
                                  actionButton("go", "Make predictions!")
                              ),
                             mainPanel("Sample Text")
-                            )
+                )
                 ),
                 
-                tabPanel("User Section")
+                tabPanel("Download Section",
+                         sidebarLayout(
+                             sidebarPanel(
+                                 selectizeInput("dataset", "Select a dataset to download:", 
+                                                choices = c("Full dataset", "Modified dataset")),
+                                 radioButtons("filetype", "Choose a file format:", choices = c("csv", "tsv")),
+                                 downloadButton("dl", "Download")
+                             ),
+                             mainPanel(
+                                 tableOutput("DataTable")
+                             )
+                         )
     )
-))
+)))
