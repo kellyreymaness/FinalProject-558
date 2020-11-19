@@ -93,5 +93,72 @@ shinyServer(function(session, input, output) {
                         row.names = FALSE)
         }
     )
+    
+    #### MODELING TAB  
+    TrainIndex <- createDataPartition(ffData$FantasyPoints, p=0.7, list=FALSE)
+    TrainData <- ffData[TrainIndex, ]
+    TestData <- ffData[-TrainIndex, ]
+    
+    
+    # Model 1 – Multiple Linear Regression, MODELING TAB
+    observeEvent(input$go, {
+        userinput <- data.frame(Pos=input$pos,
+                                Age=input$age,
+                                GS=input$gamestart,
+                                FumblesLost=input$fumbles,
+                                PassTD=input$passtd,
+                                RushTD=input$rushtd,
+                                RecTD=input$rectd,
+                                Opps=input$opp,
+                                Touches=input$touch,
+                                QualPerTouch=input$quality)
+        
+        
+        LMFit <- train(FantasyPoints ~ Pos + Age + GS + FumblesLost + PassTD + RushTD + RecTD +
+                           Opps + Touches + QualPerTouch,
+                       data=TrainData,
+                       method="lm",
+                       preProcess=c("center", "scale"),
+                       trControl = trainControl(method="cv", number = 10))
+        
+        
+        LMPredict <- predict(LMFit, newdata = userinput)
+        
+    })
+    
+    output$ModelLM <- renderText({
+        paste(LMPredict())
+    })
+    
+    
+    # Model 2 - Random Forest, MODELING TAB
+    
+    observeEvent(input$go, {
+        
+        userinput <- data.frame(Pos=input$pos,
+                                Age=input$age,
+                                GS=input$gamestart,
+                                FumblesLost=input$fumbles,
+                                PassTD=input$passtd,
+                                RushTD=input$rushtd,
+                                RecTD=input$rectd,
+                                Opps=input$opp,
+                                Touches=input$touch,
+                                QualPerTouch=input$quality)
+        
+        RFFit <- train(FantasyPoints ~ Pos + Age + GS + FumblesLost + PassTD + RushTD + RecTD +
+                           Opps + Touches + QualPerTouch,
+                       data=TrainData,
+                       method="rf",
+                       trControl=trainControl(method="cv", number = 10))
+        
+        RFPredict <- predict(RFFit, newdata=userinput)
+        
+    })
+    
+    output$ModelRF <- renderText({
+       paste(RFPredict())
+    })
+    
 
 })

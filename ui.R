@@ -134,9 +134,12 @@ shinyUI(fluidPage(
                                  sliderInput("quality", "Quality Per Touch:", min=0, max=38, value=9.5, step=2),
                                  actionButton("go", "Make predictions!")
                              ),
-                            mainPanel("Sample Text")
+                             mainPanel(
+                             verbatimTextOutput("ModelLM"),
+                             verbatimTextOutput("ModelRF")
                 )
-                ),
+                )
+            ),
                 
                 tabPanel("Download Section",
                          sidebarLayout(
